@@ -1,0 +1,40 @@
+meter::-webkit-meter-bar {
+	box-shadow: 0 5px 5px -5px #999 inset;
+	background-size: 100% 100%;
+	border-radius: 8px;
+	width: 100%;
+	box-shadow: 0 5px 5px -5px #999 inset;
+	height: 7px;
+	width: 100%;
+	outline: none;
+	-webkit-appearance: none;
+}
+
+meter.active::-webkit-meter-optimum-value {
+	background-image: linear-gradient(90deg, #bf78eb 0%, #9b4dca 100%);
+}
+
+meter.disabled::-webkit-meter-optimum-value {
+	background-image: linear-gradient(90deg, #fff 0%, #fff 100%);
+}
+
+input[type='range'] {
+	box-shadow: 0 5px 5px -5px #999 inset;
+	background-image: linear-gradient(90deg, #bf78eb 0%, #9b4dca 100%);
+	background-size: 100% 100%;
+	border-radius: 8px;
+	width: 100%;
+	box-shadow: 0 5px 5px -5px #999 inset;
+	height: 7px;
+	width: 100%;
+	outline: none;
+	-webkit-appearance: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+	width: 8px;
+	-webkit-appearance: none;
+	height: 12px;
+	background: #606c76;
+	border-radius: 2px;
+}
