@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, ipcRenderer} from 'electron'
+import {app, BrowserWindow, ipcMain, shell} from 'electron'
 import * as path from 'path'
 import * as fs from 'fs/promises'
 import installExtension, {REACT_DEVELOPER_TOOLS} from 'electron-devtools-installer'
@@ -11,7 +11,8 @@ let userSettings: SettingsInterface = {
 		deviceId: 'default'
 	},
 	audioThreshold: 20,
-	talkingTimeout: 30000
+	speechTimeout: 30000,
+	silenceTime: 0
 }
 
 const CONFIG_JSON = path.resolve(app.getPath('userData'), './engagement-tools.json')
@@ -26,8 +27,15 @@ const createWindow = async () => {
 	userSettings = JSON.parse(await fs.readFile(CONFIG_JSON, 'utf-8'))
 
 	const win = new BrowserWindow({
-		width: 1000,
+		width: 650,
 		height: 400,
+		maximizable: false,
+		resizable: false,
+		useContentSize: true,
+		alwaysOnTop: true,
+		fullscreen: false,
+		autoHideMenuBar: true,
+		icon: './public/logo256.png',
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js'),
 			nodeIntegration: true,
@@ -39,7 +47,7 @@ const createWindow = async () => {
 		win.loadURL(`file://${__dirname}/../index.html`)
 	} else {
 		win.loadURL('http://localhost:3000/index.html')
-		win.webContents.openDevTools()
+		// win.webContents.openDevTools()
 
 		// Hot Reloading on 'node_modules/.bin/electronPath'
 		require('electron-reload')(__dirname, {
@@ -72,7 +80,9 @@ app.whenReady().then(() => {
 		if (process.platform !== 'darwin') app.quit()
 	})
 
-	ipcMain.handle('get-settings', (_, key: SettingsKeyEnum): any => userSettings[key])
+	ipcMain.handle('open-external', (e: any, url: string) => shell.openExternal(url))
+
+	ipcMain.handle('get-settings', (e: any, key: SettingsKeyEnum): any => userSettings[key])
 
 	ipcMain.handle('set-settings', async (event, key: SettingsKeyEnum, value) => {
 		userSettings[key] = value

@@ -1,3 +1,62 @@
+body {
+	background: #2c2f34;
+	color: #f2f2f2;
+}
+
+.container {
+	width: 50rem !important;
+}
+
+.navigation .title,
+.navigation-title {
+	color: #f2f2f2;
+}
+
+.navigation {
+	background: #34373c;
+	border-bottom: 0.1rem solid #1b1c1d;
+}
+
+.header {
+	background-color: #141518;
+}
+
+pre {
+	background: #141518;
+}
+
+.prettyprint {
+	color: #f2f2f2;
+}
+
+.prettyprint.lang-md * {
+	color: #f2f2f2 !important;
+}
+
+code {
+	background: #141518;
+}
+
+.prettyprint .atv {
+	color: rgba(73, 158, 223, 1);
+}
+
+label {
+	color: #f4f5f6;
+}
+
+select {
+	color: #f4f5f6;
+}
+
+option {
+	background: #2c2f34;
+}
+
+meter {
+	width: 100%;
+}
+
 meter::-webkit-meter-bar {
 	box-shadow: 0 5px 5px -5px #999 inset;
 	background-size: 100% 100%;
@@ -5,7 +64,6 @@ meter::-webkit-meter-bar {
 	width: 100%;
 	box-shadow: 0 5px 5px -5px #999 inset;
 	height: 7px;
-	width: 100%;
 	outline: none;
 	-webkit-appearance: none;
 }
@@ -35,6 +93,25 @@ input[type='range']::-webkit-slider-thumb {
 	width: 8px;
 	-webkit-appearance: none;
 	height: 12px;
-	background: #606c76;
+	background: #f4f5f6;
 	border-radius: 2px;
+}
+
+.pulls {
+	background-color: #2c2f34;
+	animation-name: color;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+}
+
+@keyframes color {
+	0% {
+		background-color: #2c2f34;
+	}
+	50% {
+		background-color: #9b4dca;
+	}
+	100 {
+		background-color: #2c2f34;
+	}
 }

@@ -1,25 +1,22 @@
 import React, {useEffect, useState} from 'react'
 import {AudioInputDeviceInterface, SettingsKeyEnum, Timer} from './interfaces'
+import type {IpcRendererEvent} from 'electron'
 const {ipcRenderer} = window.require('electron')
 
-const meterStyle = {
-	width: '100%'
-}
 let timeout: Timer | null = null
+let talkingCoeff: number = 0
 
 const AudioDeviceAnalyser = () => {
 	const [audioPeak, setAudioPeak] = useState(0)
 	const [audioThreshold, setAudioThreshold] = useState(0)
 	const [audioDevice, setAudioDevice] = useState<AudioInputDeviceInterface | null>(null)
 
-	const handleSettings = (_: void, key: SettingsKeyEnum, value: any) => {
-		console.log('handleSettings')
+	const handleSettings = (e: IpcRendererEvent, key: SettingsKeyEnum, value: any) => {
 		if (key === SettingsKeyEnum.defaultAudioDevice) setAudioDevice(value)
 		if (key === SettingsKeyEnum.audioThreshold) setAudioThreshold(value)
 	}
 
 	const handleSetAudioThreshold = (e: React.ChangeEvent<HTMLInputElement>) => {
-		console.log('handleSetAudioThreshold')
 		const value = Number(e.target.value)
 		setAudioThreshold(Number(value))
 		if (timeout) clearTimeout(timeout)
@@ -27,18 +24,33 @@ const AudioDeviceAnalyser = () => {
 	}
 
 	useEffect(() => {
-		console.log('top use Effect')
 		const main = async () => {
 			setAudioDevice(await ipcRenderer.invoke('get-settings', SettingsKeyEnum.defaultAudioDevice))
 			setAudioThreshold(await ipcRenderer.invoke('get-settings', SettingsKeyEnum.audioThreshold))
 		}
 		main()
+
+		const silenceInterval = setInterval(() => {
+			if (talkingCoeff > 300) {
+				talkingCoeff = 0
+				ipcRenderer.invoke('set-settings', SettingsKeyEnum.silenceTime, 0)
+			}
+			console.log(talkingCoeff)
+		}, 1000)
+
 		ipcRenderer.on('set-settings', handleSettings)
-		return () => ipcRenderer.removeListener('set-settings', handleSettings)
+		return () => {
+			clearInterval(silenceInterval)
+			ipcRenderer.removeListener('set-settings', handleSettings)
+		}
 	}, [])
 
 	useEffect(() => {
-		console.log('audioStart')
+		audioThreshold > audioPeak ? --talkingCoeff : ++talkingCoeff
+		if (talkingCoeff < 0) talkingCoeff = 0
+	}, [audioThreshold, audioPeak])
+
+	useEffect(() => {
 		let source: MediaStreamAudioSourceNode | null = null
 		let audioContext: AudioContext | null = null
 		let audioStream: MediaStream | null = null
@@ -46,7 +58,6 @@ const AudioDeviceAnalyser = () => {
 
 		const main = async () => {
 			if (audioDevice !== null) {
-				console.log('multiple calls!')
 				audioStream = await navigator.mediaDevices.getUserMedia({
 					audio: {
 						deviceId: audioDevice.deviceId
@@ -60,20 +71,18 @@ const AudioDeviceAnalyser = () => {
 				source = audioContext.createMediaStreamSource(audioStream)
 				source.connect(analyser)
 
-				if (interval) clearInterval(interval)
 				interval = setInterval(() => {
 					const dataArray = new Uint8Array(analyser.frequencyBinCount)
 					analyser.getByteFrequencyData(dataArray)
 					const max = Math.max(...dataArray)
 					setAudioPeak((max / 255) * 100)
-				}, 30)
+				}, 50)
 			}
 		}
 
 		main()
 
 		return () => {
-			console.log('audioRemove')
 			if (source) source.disconnect()
 			if (interval) clearInterval(interval)
 			if (audioContext) audioContext.close()
@@ -93,14 +102,7 @@ const AudioDeviceAnalyser = () => {
 			</div>
 			<div className='row'>
 				<div className='column'>
-					<input
-						value={audioThreshold}
-						onChange={handleSetAudioThreshold}
-						style={meterStyle}
-						type='range'
-						min='0'
-						max='100'
-					/>
+					<input value={audioThreshold} onChange={handleSetAudioThreshold} type='range' min='0' max='100' />
 				</div>
 			</div>
 			<div className='row'>
@@ -114,7 +116,6 @@ const AudioDeviceAnalyser = () => {
 			<div className='row'>
 				<div className='column'>
 					<meter
-						style={meterStyle}
 						className={audioPeak < audioThreshold ? 'disabled' : 'active'}
 						min='0'
 						max='100'

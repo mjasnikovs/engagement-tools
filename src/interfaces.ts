@@ -7,13 +7,15 @@ export interface AudioInputDeviceInterface {
 export enum SettingsKeyEnum {
 	defaultAudioDevice = 'defaultAudioDevice',
 	audioThreshold = 'audioThreshold',
-	talkingTimeout = 'talkingTimeout'
+	speechTimeout = 'speechTimeout',
+	silenceTime = 'silenceTime'
 }
 
 export interface SettingsInterface {
 	[SettingsKeyEnum.defaultAudioDevice]: AudioInputDeviceInterface
 	[SettingsKeyEnum.audioThreshold]: number
-	[SettingsKeyEnum.talkingTimeout]: number
+	[SettingsKeyEnum.speechTimeout]: number
+	[SettingsKeyEnum.silenceTime]: number
 }
 
 export type Timer = ReturnType<typeof setTimeout | typeof setInterval>

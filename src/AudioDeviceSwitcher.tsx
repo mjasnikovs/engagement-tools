@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {AudioInputDeviceInterface, SettingsKeyEnum} from './interfaces'
+import type {IpcRendererEvent} from 'electron'
 const {ipcRenderer} = window.require('electron')
 
 const AudioDeviceSwitcher = () => {
@@ -13,13 +14,15 @@ const AudioDeviceSwitcher = () => {
 		if (typeof find !== 'undefined') ipcRenderer.invoke('set-settings', SettingsKeyEnum.defaultAudioDevice, find)
 	}
 
-	const handleSettings = (_: void, key: SettingsKeyEnum, value: AudioInputDeviceInterface) => {
+	const handleSettings = (e: IpcRendererEvent, key: SettingsKeyEnum, value: AudioInputDeviceInterface) => {
 		if (key === SettingsKeyEnum.defaultAudioDevice) setAudioDevice(value)
 	}
 
 	useEffect(() => {
 		ipcRenderer.on('set-settings', handleSettings)
-		return () => ipcRenderer.removeListener('set-settings', handleSettings)
+		return () => {
+			ipcRenderer.removeListener('set-settings', handleSettings)
+		}
 	}, [])
 
 	useEffect(() => {
