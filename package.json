@@ -29,6 +29,7 @@
 		"eject": "react-scripts eject"
 	},
 	"build": {
+		"icon": "build/logo256.png",
 		"extends": null,
 		"files": [
 			"build/**/*"

@@ -35,7 +35,6 @@ const AudioDeviceAnalyser = () => {
 				talkingCoeff = 0
 				ipcRenderer.invoke('set-settings', SettingsKeyEnum.silenceTime, 0)
 			}
-			console.log(talkingCoeff)
 		}, 1000)
 
 		ipcRenderer.on('set-settings', handleSettings)

@@ -21,10 +21,14 @@ const createWindow = async () => {
 	try {
 		await fs.access(CONFIG_JSON, fs.constants.R_OK | fs.constants.W_OK)
 	} catch (e) {
-		await fs.writeFile(CONFIG_JSON, '{}')
+		await fs.writeFile(CONFIG_JSON, JSON.stringify(userSettings, null, 4))
 	}
 
-	userSettings = JSON.parse(await fs.readFile(CONFIG_JSON, 'utf-8'))
+	try {
+		userSettings = JSON.parse(await fs.readFile(CONFIG_JSON, 'utf-8'))
+	} catch (e) {
+		await fs.writeFile(CONFIG_JSON, JSON.stringify(userSettings, null, 4))
+	}
 
 	const win = new BrowserWindow({
 		width: 650,
@@ -47,7 +51,7 @@ const createWindow = async () => {
 		win.loadURL(`file://${__dirname}/../index.html`)
 	} else {
 		win.loadURL('http://localhost:3000/index.html')
-		// win.webContents.openDevTools()
+		win.webContents.openDevTools()
 
 		// Hot Reloading on 'node_modules/.bin/electronPath'
 		require('electron-reload')(__dirname, {
