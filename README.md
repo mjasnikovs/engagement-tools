@@ -9,16 +9,18 @@ Thank you for using the Engagement-Tools app, and happy livestreaming!
 ![alt engagement-tools](screenshot.png)
 
 ## Settings
-Threshold: This setting refers to the minimum volume level that the app will recognize as speech. You can adjust this setting to make the app more or less sensitive to speech.
+**Threshold:** This setting refers to the minimum volume level that the app will recognize as speech. You can adjust this setting to make the app more or less sensitive to speech.
 
-Peak: This setting allows the user to monitor the maximum volume level of their audio input.
+**Peak:** This setting allows the user to monitor the maximum volume level of their audio input.
 
-Speech timeout: This setting determines the maximum duration of silence before the app issues a warning to the user. The user can adjust this value to set the maximum time allowed for silence before the app prompts the user to speak up.
+**Speech timeout:** This setting determines the maximum duration of silence before the app issues a warning to the user. The user can adjust this value to set the maximum time allowed for silence before the app prompts the user to speak up.
 
-Silence sensitivity: This setting determines how sensitive the app is to periods of silence. The user can adjust this value to make the app more or less sensitive to silence. The larger the value, the longer you have to talk to reset the silence.
+**Silence sensitivity:** This setting determines how sensitive the app is to periods of silence. The user can adjust this value to make the app more or less sensitive to silence. The larger the value, the longer you have to talk to reset the silence.
 
-Silence monitor: This setting allows the user to monitor the duration and frequency of periods of silence during their livestream.
+**Silence monitor:** This setting allows the user to monitor the duration and frequency of periods of silence during their livestream.
 
+
+## notes
 ####  Build for Win using docker
 ```js
 docker pull electronuserland/builder:wine
