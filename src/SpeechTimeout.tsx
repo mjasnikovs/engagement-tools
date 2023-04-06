@@ -3,7 +3,8 @@ import {SettingsKeyEnum, Timer} from './interfaces'
 import type {IpcRendererEvent} from 'electron'
 const {ipcRenderer} = window.require('electron')
 
-let timeout: Timer | null = null
+let timeout1: Timer | null = null
+let timeout2: Timer | null = null
 
 const secondsToMinutesAndSeconds = (seconds: number): string => {
 	const minutes = Math.floor(seconds / 60)
@@ -16,25 +17,32 @@ const secondsToMinutesAndSeconds = (seconds: number): string => {
 const SpeechTimeout = () => {
 	const [speechTimeout, setSpeechTimeout] = useState(0)
 	const [silence, setSilence] = useState(0)
+	const [silanceSensetivity, setSilanceSensetivity] = useState(0)
 
 	const handleSettings = (e: IpcRendererEvent, key: SettingsKeyEnum, value: any) => {
 		if (key === SettingsKeyEnum.speechTimeout) setSpeechTimeout(value)
-		if (key === SettingsKeyEnum.silenceTime) {
-			document.body.classList.remove('pulls')
-			setSilence(value)
-		}
+		if (key === SettingsKeyEnum.silanceSensetivity) setSilanceSensetivity(value)
+		if (key === SettingsKeyEnum.silenceTime) setSilence(value)
 	}
 
 	const handleSetSpeechTimeout = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = Number(e.target.value)
 		setSpeechTimeout(Number(value))
-		if (timeout) clearTimeout(timeout)
-		timeout = setTimeout(() => ipcRenderer.invoke('set-settings', SettingsKeyEnum.speechTimeout, value), 500)
+		if (timeout1) clearTimeout(timeout1)
+		timeout1 = setTimeout(() => ipcRenderer.invoke('set-settings', SettingsKeyEnum.speechTimeout, value), 500)
+	}
+
+	const handleSetSilanceSensetivity = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number(e.target.value)
+		setSilanceSensetivity(Number(value))
+		if (timeout2) clearTimeout(timeout2)
+		timeout2 = setTimeout(() => ipcRenderer.invoke('set-settings', SettingsKeyEnum.silanceSensetivity, value), 500)
 	}
 
 	useEffect(() => {
 		const main = async () => {
 			setSpeechTimeout(await ipcRenderer.invoke('get-settings', SettingsKeyEnum.speechTimeout))
+			setSilanceSensetivity(await ipcRenderer.invoke('get-settings', SettingsKeyEnum.silanceSensetivity))
 		}
 		main()
 		ipcRenderer.on('set-settings', handleSettings)
@@ -45,7 +53,11 @@ const SpeechTimeout = () => {
 
 	useEffect(() => {
 		const timeout = setTimeout(() => {
-			if (silence + 1 > speechTimeout) document.body.classList.add('pulls')
+			if (silence + 1 > speechTimeout) {
+				document.body.classList.add('pulls')
+			} else {
+				document.body.classList.remove('pulls')
+			}
 			setSilence(silence + 1)
 		}, 1000)
 		return () => clearTimeout(timeout)
@@ -64,6 +76,25 @@ const SpeechTimeout = () => {
 			<div className='row'>
 				<div className='column'>
 					<input value={speechTimeout} onChange={handleSetSpeechTimeout} type='range' min='0' max='300' />
+				</div>
+			</div>
+			<div className='row'>
+				<div className='column'>
+					<label>Silence sensetivity</label>
+				</div>
+				<div className='column'>
+					<label className='float-right'>{secondsToMinutesAndSeconds(silanceSensetivity)}</label>
+				</div>
+			</div>
+			<div className='row'>
+				<div className='column'>
+					<input
+						value={silanceSensetivity}
+						onChange={handleSetSilanceSensetivity}
+						type='range'
+						min='0'
+						max='10'
+					/>
 				</div>
 			</div>
 			<div className='row'>

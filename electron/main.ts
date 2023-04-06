@@ -5,14 +5,11 @@ import installExtension, {REACT_DEVELOPER_TOOLS} from 'electron-devtools-install
 import {SettingsInterface, SettingsKeyEnum} from '../src/interfaces'
 
 let userSettings: SettingsInterface = {
-	defaultAudioDevice: {
-		kind: 'audioinput',
-		label: 'Default',
-		deviceId: 'default'
-	},
-	audioThreshold: 20,
-	speechTimeout: 30000,
-	silenceTime: 0
+	defaultAudioDevice: null,
+	audioThreshold: 5,
+	speechTimeout: 15,
+	silenceTime: 0,
+	silanceSensetivity: 2
 }
 
 const CONFIG_JSON = path.resolve(app.getPath('userData'), './engagement-tools.json')
@@ -25,20 +22,20 @@ const createWindow = async () => {
 	}
 
 	try {
-		userSettings = JSON.parse(await fs.readFile(CONFIG_JSON, 'utf-8'))
+		userSettings = {...userSettings, ...JSON.parse(await fs.readFile(CONFIG_JSON, 'utf-8'))}
 	} catch (e) {
 		await fs.writeFile(CONFIG_JSON, JSON.stringify(userSettings, null, 4))
 	}
 
 	const win = new BrowserWindow({
-		width: 650,
-		height: 400,
-		maximizable: false,
-		resizable: false,
+		width: app.isPackaged ? 650 : 1200,
+		height: app.isPackaged ? 460 : 600,
+		maximizable: !app.isPackaged,
+		resizable: !app.isPackaged,
 		useContentSize: true,
 		alwaysOnTop: true,
 		fullscreen: false,
-		autoHideMenuBar: true,
+		autoHideMenuBar: app.isPackaged,
 		icon: './public/logo256.png',
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js'),

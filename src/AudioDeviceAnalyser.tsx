@@ -4,16 +4,18 @@ import type {IpcRendererEvent} from 'electron'
 const {ipcRenderer} = window.require('electron')
 
 let timeout: Timer | null = null
-let talkingCoeff: number = 0
+let speechTime: number = 0
 
 const AudioDeviceAnalyser = () => {
 	const [audioPeak, setAudioPeak] = useState(0)
 	const [audioThreshold, setAudioThreshold] = useState(0)
 	const [audioDevice, setAudioDevice] = useState<AudioInputDeviceInterface | null>(null)
+	const [silanceSensetivity, setSilanceSensetivity] = useState(0)
 
 	const handleSettings = (e: IpcRendererEvent, key: SettingsKeyEnum, value: any) => {
 		if (key === SettingsKeyEnum.defaultAudioDevice) setAudioDevice(value)
 		if (key === SettingsKeyEnum.audioThreshold) setAudioThreshold(value)
+		if (key === SettingsKeyEnum.silanceSensetivity) setSilanceSensetivity(value)
 	}
 
 	const handleSetAudioThreshold = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,27 +29,29 @@ const AudioDeviceAnalyser = () => {
 		const main = async () => {
 			setAudioDevice(await ipcRenderer.invoke('get-settings', SettingsKeyEnum.defaultAudioDevice))
 			setAudioThreshold(await ipcRenderer.invoke('get-settings', SettingsKeyEnum.audioThreshold))
+			setSilanceSensetivity(await ipcRenderer.invoke('get-settings', SettingsKeyEnum.silanceSensetivity))
 		}
 		main()
 
-		const silenceInterval = setInterval(() => {
-			if (talkingCoeff > 300) {
-				talkingCoeff = 0
-				ipcRenderer.invoke('set-settings', SettingsKeyEnum.silenceTime, 0)
-			}
-		}, 1000)
-
 		ipcRenderer.on('set-settings', handleSettings)
 		return () => {
-			clearInterval(silenceInterval)
 			ipcRenderer.removeListener('set-settings', handleSettings)
 		}
 	}, [])
 
 	useEffect(() => {
-		audioThreshold > audioPeak ? --talkingCoeff : ++talkingCoeff
-		if (talkingCoeff < 0) talkingCoeff = 0
-	}, [audioThreshold, audioPeak])
+		if (audioPeak >= audioThreshold) {
+			speechTime += 50
+		} else {
+			speechTime -= 50
+		}
+		if (speechTime < 0) speechTime = 0
+
+		if (speechTime > silanceSensetivity * 1000) {
+			speechTime = 0
+			ipcRenderer.invoke('set-settings', SettingsKeyEnum.silenceTime, 0)
+		}
+	}, [audioPeak, audioThreshold, silanceSensetivity])
 
 	useEffect(() => {
 		let source: MediaStreamAudioSourceNode | null = null
@@ -115,7 +119,7 @@ const AudioDeviceAnalyser = () => {
 			<div className='row'>
 				<div className='column'>
 					<meter
-						className={audioPeak < audioThreshold ? 'disabled' : 'active'}
+						className={audioPeak > audioThreshold ? 'active' : 'disabled'}
 						min='0'
 						max='100'
 						value={audioPeak.toFixed(2)}

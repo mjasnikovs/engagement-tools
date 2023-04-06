@@ -11,13 +11,13 @@ const HyperLinks = () => {
 						className='button button-clear float-right'
 						onClick={() => openLink('https://streamelements.com/lielaiswuu/tip')}
 					>
-						support
+						donate
 					</button>
 					<button
 						className='button button-clear float-right'
-						onClick={() => openLink('https://www.twitch.tv/lielaiswuu')}
+						onClick={() => openLink('https://github.com/mjasnikovs/engagement-tools')}
 					>
-						twitch
+						github
 					</button>
 				</div>
 			</div>
